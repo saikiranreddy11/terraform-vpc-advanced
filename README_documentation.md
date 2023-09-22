@@ -26,7 +26,7 @@ Inputs
 
 projectname(optional) - default project name is roboshop
 
-cidr_block(Required) - User has to provide cidr block
+vpc_cidr_block(Required) - User has to provide cidr block
 
 enable_dns_hostnames(required) - User can provide enable_dns_hostnames, default is true
 
