@@ -20,3 +20,4 @@ az(optional) - User must provide 2 az.
 private_subnet_cidr(Required) - User must provide a list of 2 private subnet CIDR.
 database_subnet_cidr(Required) - User must provide a list of 2 database subnet CIDR.
 
+This is not a perfect documentation 
