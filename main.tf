@@ -60,10 +60,7 @@ resource "aws_subnet" "database" {
 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
-  route {
-    cidr_block = var.public_route
-    gateway_id = aws_internet_gateway.gw.id
-  }
+
 
    tags = merge(var.common_tags,
                  {
@@ -72,10 +69,7 @@ resource "aws_route_table" "public" {
 }
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
-  route {
-    cidr_block = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.roboshop.id
-  }
+ 
    tags = merge(var.common_tags,
                  {
                     "Name"= "${var.projectname}-private"
@@ -83,10 +77,7 @@ resource "aws_route_table" "private" {
 }
 resource "aws_route_table" "database" {
   vpc_id = aws_vpc.main.id
-  route {
-     cidr_block = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.roboshop.id
-  }
+ 
    tags = merge(var.common_tags,
                  {
                     "Name"= "${var.projectname}-database"
@@ -140,4 +131,59 @@ resource "aws_db_subnet_group" "roboshop" {
     },
     var.db_subnet_group_tags
   )
+}
+
+# this resource for vpc _peering works for only the vpc's which are in the same region and same account
+resource "aws_vpc_peering_connection" "roboshop-peering" {
+  count = var.is_peering_connection ? 1 :0
+  vpc_id        = aws_vpc.main.id
+  peer_vpc_id   = var.peer_vpc_id
+  #peer_region   = "us-east-1"
+  auto_accept   = true  
+
+  tags = merge(
+    var.common_tags,
+    {
+        Name = var.projectname
+    }
+  )
+}
+resource "aws_route" "public_route" {
+  
+  route_table_id            = aws_route_table.public.id  # Replace with your actual route table ID
+  destination_cidr_block   =   var.public_route# Replace with the CIDR block of the peer VPC
+  gateway_id = aws_internet_gateway.gw.id  # Replace with your VPC peering connection ID
+}
+resource "aws_route" "private_route" {
+  
+  route_table_id            = aws_route_table.private.id  # Replace with your actual route table ID
+  destination_cidr_block   =    "0.0.0.0/0"# Replace with the CIDR block of the peer VPC
+  nat_gateway_id = aws_nat_gateway.roboshop.id  # Replace with your VPC peering connection ID
+}
+resource "aws_route" "database_route" {
+  count = var.is_peering_connection ? 1 :0
+  route_table_id            = aws_route_table.database.id  # Replace with your actual route table ID
+  destination_cidr_block   =   "0.0.0.0/0"# Replace with the CIDR block of the peer VPC
+   nat_gateway_id = aws_nat_gateway.roboshop.id  # Replace with your VPC peering connection ID
+}
+
+resource "aws_route" "public_rt_peering_route" {
+  count = var.is_peering_connection ? 1 :0
+  route_table_id            = aws_route_table.public.id  # Replace with your actual route table ID
+  destination_cidr_block   =    var.peer_cidr_block# Replace with the CIDR block of the peer VPC
+  vpc_peering_connection_id = aws_vpc_peering_connection.roboshop-peering[count.index].id  # Replace with your VPC peering connection ID
+}
+
+resource "aws_route" "private_rt_peering_route" {
+  count = var.is_peering_connection ? 1 :0
+  route_table_id            = aws_route_table.private.id  # Replace with your actual route table ID
+  destination_cidr_block   =    var.peer_cidr_block# Replace with the CIDR block of the peer VPC
+  vpc_peering_connection_id = aws_vpc_peering_connection.roboshop-peering[count.index].id  # Replace with your VPC peering connection ID
+}
+
+resource "aws_route" "database_rt_peering_route" {
+  count = var.is_peering_connection ? 1 :0
+  route_table_id            = aws_route_table.database.id  # Replace with your actual route table ID
+  destination_cidr_block   =    var.peer_cidr_block# Replace with the CIDR block of the peer VPC
+  vpc_peering_connection_id = aws_vpc_peering_connection.roboshop-peering[count.index].id  # Replace with your VPC peering connection ID
 }

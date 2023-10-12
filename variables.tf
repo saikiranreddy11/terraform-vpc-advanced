@@ -88,3 +88,15 @@ variable database_routetable_tags{
 variable db_subnet_group_tags{
   default = {}
 }
+
+variable peer_vpc_id{
+  default = ""
+}
+
+variable peer_cidr_block{
+  default=""
+}
+
+variable "is_peering_connection"{
+  default = false
+}

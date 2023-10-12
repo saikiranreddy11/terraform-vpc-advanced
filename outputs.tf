@@ -23,3 +23,7 @@ output "private_subnet_id"{
 output "database_subnet_id"{
     value = aws_subnet.database[*].id
 }
+
+output "peering_id"{
+    value = aws_vpc_peering_connection.roboshop-peering[*].id
+}   
