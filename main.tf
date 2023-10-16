@@ -6,7 +6,7 @@ resource "aws_vpc" "main" {
   tags = merge(var.common_tags,
                 var.vpc_tags,
                  {
-                    "Name"= var.projectname
+                    "Name"= "${var.projectname}-${var.env}"
                 })
 }
 
@@ -17,7 +17,7 @@ resource "aws_internet_gateway" "gw" {
   tags = merge(var.common_tags,
                 var.gw_tags,
                 {
-                    "Name"= var.projectname
+                    "Name"= "${var.projectname}-${var.env}"
                 })
 }
 
@@ -29,7 +29,7 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = "true"
   tags = merge(var.common_tags,
                  {
-                    "Name"= "${var.projectname}-public-${var.az[count.index]}"
+                    "Name"= "${var.projectname}-${var.env}-public-${var.az[count.index]}"
                 })
 }
 
@@ -41,7 +41,7 @@ resource "aws_subnet" "private" {
 
   tags = merge(var.common_tags,
                 {
-                    "Name"= "${var.projectname}-private-${var.az[count.index]}"
+                    "Name"= "${var.projectname}-${var.env}-private-${var.az[count.index]}"
                 })
 }
 
@@ -53,7 +53,7 @@ resource "aws_subnet" "database" {
 
   tags = merge(var.common_tags,
                  {
-                    "Name"= "${var.projectname}-database-${var.az[count.index]}"
+                    "Name"= "${var.projectname}-${var.env}-database-${var.az[count.index]}"
                 })
 }
 
@@ -64,7 +64,7 @@ resource "aws_route_table" "public" {
 
    tags = merge(var.common_tags,
                  {
-                    "Name"= "${var.projectname}-public"
+                    "Name"= "${var.projectname}-${var.env}-public"
                 },var.public_routetable_tags)
 }
 resource "aws_route_table" "private" {
@@ -72,7 +72,7 @@ resource "aws_route_table" "private" {
  
    tags = merge(var.common_tags,
                  {
-                    "Name"= "${var.projectname}-private"
+                    "Name"= "${var.projectname}-${var.env}-private"
                 },var.private_routetable_tags)
 }
 resource "aws_route_table" "database" {
@@ -80,7 +80,7 @@ resource "aws_route_table" "database" {
  
    tags = merge(var.common_tags,
                  {
-                    "Name"= "${var.projectname}-database"
+                    "Name"= "${var.projectname}-${var.env}-database"
                 },var.database_routetable_tags)
 }
 
@@ -103,7 +103,7 @@ resource "aws_route_table_association" "db_subnet_association" {
 
 resource "aws_eip" "roboshop_eip" {
   tags = {
-      "Name"= "${var.projectname}"
+      "Name"=  "${var.projectname}-${var.env}"
   }
 }
 
@@ -112,7 +112,7 @@ resource "aws_nat_gateway" "roboshop" {
   subnet_id     = aws_subnet.public[0].id
   tags = merge(var.common_tags,
                  {
-                    "Name"= "${var.projectname}-NAT"
+                    "Name"= "${var.projectname}-${var.env}-NAT"
                 })
 
   # To ensure proper ordering, it is recommended to add an explicit dependency
@@ -127,7 +127,7 @@ resource "aws_db_subnet_group" "roboshop" {
   tags = merge(
     var.common_tags,
     {
-        Name = var.projectname
+        "Name"= "${var.projectname}-${var.env}"
     },
     var.db_subnet_group_tags
   )
@@ -144,7 +144,7 @@ resource "aws_vpc_peering_connection" "roboshop-peering" {
   tags = merge(
     var.common_tags,
     {
-        Name = var.projectname
+        Name = "${var.projectname}-${var.env}"
     }
   )
 }

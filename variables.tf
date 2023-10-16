@@ -8,6 +8,9 @@ variable "common_tags"{
    default ={}
 }
 
+variable "env"{
+  
+}
 variable "vpc_tags"{
    default ={}
 }
